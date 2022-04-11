@@ -1,0 +1,120 @@
+Prerequisites:
+
+    1) AWS IAM credentials
+    2) AWS command-line interface installed and configured. See https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+    3) Python 3.7+
+    
+#############################################################################################################################
+
+Overview: This script collects the full path of all files to be offloaded to AWS S3 in a file called archive_files.txt, uploads 
+all files in archive_files.txt and replacing each file with a file with the same name but appended with .archive 
+(called a placeholder file), and later can be used to restore the placeholder files with the original files from AWS S3. 
+Each of these steps requires a separate call to the script. Examples are shown below.
+    
+#############################################################################################################################
+    
+!!! IMPORTANT !!! 
+
+Restoring files can take up to 12 hours since they are stored in Glacier Deep Archive. It is advised you begin the process in a tmux session.
+    
+#############################################################################################################################    
+    
+Options:
+
+    -s/--save: write the full path of all collected files in <directory_to_archive> and all its subdirectories to ./archive_files.txt. 
+    This will append to ./archive_files.txt unless the -o/--overwrite option is passed.
+
+        --large: used with the -s/--save argument. Only record to archive_files.txt files that are greater than the specified size in GB. 
+        For example --large 0.5 will only record files greater than 0.5 GB or 500 MB.
+
+        -f/--archivefile: used with the -s/--save argument. The path to search for the archive_files.txt file. 
+
+        -o/--overwrite: overwrite the current archive_files.txt file.
+
+        -A/--all_h5: used to archive all h5 files in <directory_to_archive> and all its subdirectories.
+    
+    -L/--load: upload all files listed in archive_files.txt to AWS S3 Glacier Deep Archive. The script will search for archive_files.txt 
+    in the current working directory unless the -f/--archivefile option is provided.
+    
+    -R/--restore: restore all placeholder files (ending in .archive) in <directory_to_archive> and all its subdirectories.
+
+        -T/--toplevelonly: used with the -R/--restore argument. Only restore .archive files in <directory_to_archive>, 
+        but not any of its subdirectories.
+    
+    --list: list all .archive files in <directory_to_archive> and all its subdirectories. Only valid when used with no other options.
+    
+    --regex: can be used with the -s or -R options. Only files matching the regular expression will be saved to archive_files.txt or restored.
+    
+#############################################################################################################################    
+    
+Workflow:
+
+    Below it is assumed you have lab3 installed in ~/code and both archive.py and archive_helper.py are located in the 
+    ~/code/lab3/archiveHelper/ directory.
+
+    *** Generating the archive_files.txt file
+    
+        ---------------------------------------------------------------------------------------------
+
+        Example 1: Write all files in the home directory and all subdirectories larger than 0.1 GB to the archive_files.txt in 
+        the current directory. Overwrite the current archive_files.txt.
+
+        $ cd ~
+        $ python3 ~/code/lab3/archiveHelper/archive.py -s --large 0.1 -o
+        
+        ---------------------------------------------------------------------------------------------
+
+        Example 2: Write all files in the current directory and all subdirectories that contain "2021-05" in the files name and 
+        that are larger than 0.01 GB or 10 MB to the archive_files.txt file in the current directory. Overwrite the current 
+        archive_files.txt.
+
+        $ python3 ~/code/lab3/archiveHelper/archive.py . -s --regexp '.*2020-05' --large 0.01 -o
+        
+        ---------------------------------------------------------------------------------------------
+
+        Example 3: Write all files in the current directory, but NOT in any subdirectories that are larger than 1 GB to the 
+        archive_files.txt in the current directory. Append to the current archive_files.txt instead of overwriting 
+        (this is the default behavior).
+
+        $ python3 ~/code/lab3/archiveHelper/archive.py -s --large 1 --toplevelonly
+
+        ---------------------------------------------------------------------------------------------
+
+        Example 4: Write all files in /data2/myfolder/mydata and all its subdirectories greater than 0.001 GB or 1 MB to 
+        the archive_files.txt located in ./path_to_my_archive_file. 
+
+        $ python3 ~/code/lab3/archiveHelper/archive.py /data2/myfolder/mydata -f ./path_to_my_archive_file -s --large 0.001
+        
+        ---------------------------------------------------------------------------------------------
+        
+    *** Uploading files listed in archive_files.txt to AWS S3:
+    
+        ---------------------------------------------------------------------------------------------
+    
+        Example 1: Upload all files in the archive_files.txt located in the current directory to AWS S3.
+        
+        $ python3 ~/code/lab3/archiveHelper/archive.py -L
+        
+        ---------------------------------------------------------------------------------------------
+        
+        Example 2: Upload all files found in ./temp/archive_files.txt to AWS S3.
+        
+        $ python3 ~/code/lab3/archiveHelper/archive.py -f ./temp -L
+        
+        ---------------------------------------------------------------------------------------------
+    
+    *** Restoring uploaded files from AWS S3 back to the local server:
+    
+        ---------------------------------------------------------------------------------------------
+    
+        Example 1: Restore all placeholder files in the current and all subdirectories.
+        
+        $ python3 ~/code/lab3/archiveHelper/archive.py -R
+        
+        ---------------------------------------------------------------------------------------------
+        
+        Example 2: Restore all placeholder files in the current and all subdirectories that contain "202" in the file name.
+        
+        $ python3 ~/code/lab3/archiveHelper/archive.py . -R --regexp '.*202'
+        
+        ---------------------------------------------------------------------------------------------

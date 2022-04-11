@@ -1,0 +1,39 @@
+Host george 
+    HostName 129.236.191.57
+    Port 11039
+    User george
+    IdentityFile ~/.ssh/george_key
+	
+Host admin_george
+	HostName 129.236.191.57
+	Port 22
+	User admin_george
+	IdentityFile ~/.ssh/admin_george_key
+	
+Host testuser
+	HostName 129.236.191.57
+	Port 11036
+	User testuser
+	IdentityFile ~/.ssh/testuser_key
+	
+Host ali
+	HostName 129.236.191.57
+	Port 11007
+	User alikaufman
+	IdentityFile ~/.ssh/ali_key
+	
+Host gitlab.com
+  PreferredAuthentications publickey
+  IdentityFile ~/.ssh/gitlab_key
+  StrictHostKeyChecking no
+  
+Host gitlab.company.com
+  PreferredAuthentications publickey
+  IdentityFile ~/.ssh/gitlab_key
+  StrictHostKeyChecking no
+  
+Host old_server
+	HostName 129.236.191.58
+	Port 22
+	User george
+	IdentityFile ~/.ssh/old_server_key

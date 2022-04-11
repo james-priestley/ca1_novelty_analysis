@@ -1,0 +1,225 @@
+@startuml
+
+' ################################################ 
+' ################### analysis ###################
+' ################################################ 
+
+' ### lab3.analysis.base
+Analysis <|-- SignalAnalysis
+
+' ### lab3.analysis.basic.features
+SignalAnalysis <|-- FeatureExtractor
+SpatialTuning <|-- SpatialFeatureExtractor
+FeatureExtractor <|-- SpatialFeatureExtractor
+FeatureExtractor <|-- ResponsivenessFeatureExtractor
+Responsiveness <|-- ResponsivenessFeatureExtractor
+FeatureExtractor <|-- Moment
+FeatureExtractor <|-- Cumulant
+
+' ### lab3.analysis.basic.psth
+SignalAnalysis <|-- _SingleEventPSTH
+_SingleEventPSTH <|-- PSTH
+PSTH <|-- Responsiveness
+
+' ### lab3.analysis.spatial.abstract_place_fields
+SignalAnalysis <|-- PlaceFields
+
+' ### lab3.analysis.spatial.abstract_spatial_tuning
+SignalAnalysis <|-- _SingleLapSpatialTuning
+_SingleLapSpatialTuning <|-- SpatialTuning
+SpatialTuning <|-- EventSpatialTuning
+SpatialTuning <|-- Occupancy
+SpatialTuning <|-- PopulationVectorCorrelations
+SpatialTuning <|-- TuningCurveCorrelations
+
+' ### lab3.analysis.spatial.metrics
+EventSpatialTuning <|-- SkaggsSpatialInformation
+Analysis <|-- Kuiper
+
+' ### lab3.analysis.spatial.place_fields
+BaseSignalAnalysis <|-- PlaceFieldStrategy
+PlaceFieldMeta <|-- PlaceFieldStrategy
+PlaceFieldStrategy <|-- SimplePFDetector
+SimplePFDetector <|-- SignedPFDetector
+PlaceFieldStrategy <|-- PeakPFDetector
+
+' ### lab3.analysis.spatial.spatial_autocorrelation
+AutocorrelationMixin <|-- SpatialAutocorrelation
+SpatialTuning <|-- SpatialAutocorrelation
+SpatialAutocorrelation <|-- SpatialAutocorrelationWidth
+
+' ### lab3.analysis.spatial.spatial_tuning
+BaseSignalAnalysis <|-- SpatialTuningStrategy
+ABCMeta <|-- SpatialTuningStrategy
+SpatialTuningStrategy <|-- SimpleSpatialTuning
+
+' ################################################ 
+' ##################### core #####################
+' ################################################
+
+' ### lab3.core.classes
+Item <|-- Group
+list <|-- Group
+Item <|-- Analysis
+Analysis <|-- Automorphism
+Analysis <|-- AnalysisGroup
+Group <|-- AnalysisGroup
+pd.DataFrame <|-- AnalysisResult
+
+' ### lab3.core.filters
+Item <|-- Filter
+Filter <|-- _BoundFilter
+Filter <|-- FilterGroup
+Group <|-- FilterGroup
+FilterGroup <|-- _BoundFilterGroup
+_BoundFilter <|-- _BoundFilterGroup
+Filter <|-- ROIFilter
+Filter <|-- TimeFilter
+ROIFilter <|-- _IndexIdentity
+TimeFilter <|-- _ColumnIdentity
+
+' ################################################ 
+' #################### event #####################
+' ################################################
+
+' ### lab3.event.base
+Item <|-- Event
+Event <|-- TriggerEvent
+TriggerEvent <|-- OffsetEvent
+
+' ### lab3.event.group
+Group <|-- EventGroup
+Group2DataFrameMixin <|-- EventGroup
+EventGroup <|-- LFPEventGroup
+EventGroup <|-- BehaviorEventGroup
+Group <|-- EventGroupGroup
+EventGroupGroup <|-- ImagingEventGroupGroup
+Group2DataFrameMixin <|-- ImagingEventGroupGroup
+
+' ### lab3.event.lap
+Event <|-- LapEvent
+BehaviorEventGroup <|-- LapGroup
+
+' ### lab3.event.spatial
+Event <|-- SpatialEvent
+BehaviorEventGroup <|-- SpatialEventGroup
+
+' ### lab3.event.transient
+IntervalEvent <|-- Transient
+EventGroup <|-- SingleCellTransients
+ImagingEventGroupGroup <|-- ExperimentTransientGroup
+
+' ################################################ 
+' ################## experiment ##################
+' ################################################
+
+' ### lab3.experiment.base
+Item <|-- _BaseExperiment
+_BaseExperiment <|-- BehaviorExperiment
+ImagingMixin <|-- ImagingExperiment
+BehaviorExperiment <|-- ImagingExperiment
+ImagingMixin <|-- ImagingOnlyExperiment
+_BaseExperiment <|-- ImagingOnlyExperiment
+LFPMixin <|-- LFPExperiment
+BehaviorExperiment <|-- LFPEXperiment
+LFPMixin <|-- LFPOnlyExperiment
+_BaseExperiment <|-- LFPOnlyExperiment
+LFPMixin <|-- ImagingLFPExperiment
+ImagingExperiment <|-- ImagingLFPExperiment
+LFPMixin <|-- ImagingLFPOnlyExperiment
+ImagingOnlyExperiment <|-- ImagingOnlyLFPOnlyExperiment
+
+' ### lab3.experiment.group
+Group <|-- ExperimentGroup
+ExperimentGroup <|-- Mouse
+Group <|-- Cohort
+Cohort <|-- MouseGroup
+Group <|-- CohortGroup
+
+' ################################################ 
+' ################# extraction ###################
+' ################################################
+
+' ### lab3.extraction.cnmf.base
+ImagingDataset <|-- CNMFImagingDataset
+
+' ### lab3.extraction.denoising.base
+_Sequence_HDF5 <|-- _DenoisedSequence
+ImagingDataset <|-- DenoisedDataset
+
+' ### lab3.extraction.s2p.base
+ImagingDataset <|-- Suite2pStrategy
+ABCMeta <|-- Suite2pStrategy
+Suite2pStrategy <|-- Suite2pImagingDataset
+
+' ### lab3.extraction.s2p.batch
+BatchMixin <|-- BatchSuite2pImagingDataset
+Suite2pImagingDataset <|-- BatchSuite2pImagingDataset
+
+' ################################################ 
+' ################### filters ####################
+' ################################################
+
+' ### lab3.filters.roi_filters
+ROIFilter <|-- ClassifierROIFilter
+ROIFilter <|-- ResponsivenessFilter
+Responsiveness <|-- ResponsivenessFilter
+ROIFilter <|-- IsPlaceCell
+PlaceFields <|-- IsPlaceCell
+ClassifierROIFilter <|-- IsInterneuron
+IsPlaceCell <|-- PlaceFieldLocationFilter
+PlaceFieldLocationFilter <|-- PlaceFieldStart
+PlaceFieldLocationFilter <|-- PlaceFieldStop
+
+
+' ### lab3.filters.time_filters
+TimeFilter <|-- SpatialFilter
+SpatialEvent <|-- SpatialFilter
+TimeFilter <|-- EventFilter
+EventFilter <|-- IsRunning
+EventFilter <|-- InReward
+
+' ### lab3.filters.trial_filters
+Filter <|-- TrialFilter
+TrialFilter <|-- RunningTrials
+
+' ################################################ 
+' ##################### misc #####################
+' ################################################
+
+' ################################################ 
+' ################### plotting ###################
+' ################################################
+
+' ################################################ 
+' ################### signal #####################
+' ################################################
+' ### lab3.signal.base
+HDFStore <|-- SignalFile
+DataFrame <|-- SignalFrame
+
+' ### lab3.signal.decomposition
+Automorphism <|-- DecompositionStrategy
+DecompositionStrategy <|-- LinearDynamicalSystem
+
+' ### lab3.signal.dfof
+Automorphism <|-- DFOFStrategy
+DFOFStrategy <|-- CustomFilterDFOF
+DFOFStrategy <|-- JiaDFOF
+SlowTrendMixin <|-- JiaDFOF
+DFOFStrategy <|-- MaxminDFOF
+DFOFStrategy <|-- Suite2pDFOF
+
+' ### lab3.signal.signal_getter
+SignalGetter <|-- Event2Signals
+Event2Signals <|-- EventOnsets2Signals
+EventOnsets2Signals <|-- TimeOnsets2Signals
+
+' ### lab3.signal.spikes
+Automorphism <|-- SpikesStrategy
+MADMixin <|-- OasisAR1Spikes
+SpikesStrategy <|-- OasisAR1Spikes
+MADMixin <|-- OasisAR2Spikes
+SpikesStrategy <|-- OasisAR2Spikes
+
+@enduml
